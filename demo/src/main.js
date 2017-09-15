@@ -3,7 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import preview from './components/test'
+import preview from 'vue2-images-preview'
 
 Vue.config.productionTip = false
 Vue.use(preview)

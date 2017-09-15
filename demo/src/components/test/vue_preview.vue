@@ -50,7 +50,6 @@
         status: false,
         imgList: [],
         index: 0,
-        loading: true,
         zoomStatus: false,
         top: 0,
         left: 0,
