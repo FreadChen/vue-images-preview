@@ -37,10 +37,16 @@
   export default {
     data () {
       // 判断是否为PC端
-      let isPC
+      let isPC = true
       let userAgentInfo = navigator.userAgent
-      let Agents = 'Android iPhone SymbianOS Windows Phone iPad iPod'
-      if (userAgentInfo.indexOf(Agents) > 0) { isPC = false }
+      let Agents = 'Android iPhone SymbianOS WindowsPhone iPad iPod'
+      let arr = Agents.split(" ")
+      for(let i of arr) {
+        if (userAgentInfo.indexOf(i) > 0) {
+          isPC = false
+          break
+        }
+      }
       return {
         status: false,
         imgList: [],
