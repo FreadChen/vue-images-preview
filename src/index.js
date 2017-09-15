@@ -3,10 +3,9 @@
  * 陈锦浩 写于 2017-8-7
  */
 import Vue from 'vue'
-let Preview = Vue.extend(require('./vue_preview.vue'))
+let Preview = Vue.extend(require('./vue_preview.vue').default)
 let myPreview = {
   install: function (vue) {
-    // Vue.component('cPreview', vuePreview)
     let instance
     vue.prototype.$preview = function (obj, event) {
       if (!instance) {
