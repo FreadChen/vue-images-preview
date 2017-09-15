@@ -5,9 +5,9 @@
       <div class="preview_head flex_box iconfont ">
         <i v-if="isPC" class="el-icon-view pointer iconfont icon-zoomout "
            @click="zoomIn()"></i>
-        <i v-if="isPC" class="el-icon-view pointer el-icon-view"
+        <i v-if="isPC" class="pointer iconfont icon-ZoomOut"
            @click="zoomOut()"></i>
-        <i class="el-icon-close pointer" @click="close()"></i>
+        <i class="iconfont icon-close pointer" @click="close()"></i>
       </div>
       <ul
         class="flex_box" style="cursor: default" >
@@ -209,6 +209,33 @@
 <style lang="scss" scoped>
   /* 可以设置不同的进入和离开动画 */
   /* 设置持续时间和动画函数 */
+
+  @font-face {font-family: "iconfont";
+    src: url('//at.alicdn.com/t/font_379257_jjbpduoj1bk5ipb9.eot?t=1505460351699'); /* IE9*/
+    src: url('//at.alicdn.com/t/font_379257_jjbpduoj1bk5ipb9.eot?t=1505460351699#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('data:application/x-font-woff;charset=utf-8;base64,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') format('woff'),
+    url('//at.alicdn.com/t/font_379257_jjbpduoj1bk5ipb9.ttf?t=1505460351699') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
+    url('//at.alicdn.com/t/font_379257_jjbpduoj1bk5ipb9.svg?t=1505460351699#iconfont') format('svg'); /* iOS 4.1- */
+  }
+
+  .iconfont {
+    font-family:"iconfont" !important;
+    font-size:16px;
+    font-style:normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .icon-close:before { content: "\e63c"; }
+
+  .icon-ZoomOut:before { content: "\e612"; }
+
+  .icon-zoomout:before { content: "\e614"; }
+
+  .icon-fullscreen:before { content: "\e6fe"; }
+
+  .icon-narrow:before { content: "\e711"; }
+
   .preview-leave-active {
     transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
     transform: translateX(100%);
