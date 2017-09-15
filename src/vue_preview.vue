@@ -1,6 +1,6 @@
 <template>
   <transition name="preview" @after-enter="beforeEnter">
-    <div class="v_p_box" v-show="status" v-loading="loading"
+    <div class="v_p_box" v-show="status"
          :style="{left: X?X+'px':0, top: Y?Y+'px':0, width: width?width+'px':'100%', height: height? height + 'px': '100%'}">
       <div class="preview_head flex_box iconfont ">
         <i v-if="isPC" class="el-icon-view pointer iconfont icon-zoomout "
@@ -45,7 +45,6 @@
         status: false,
         imgList: [],
         index: 0,
-        loading: true,
         zoomStatus: false,
         top: 0,
         left: 0,
