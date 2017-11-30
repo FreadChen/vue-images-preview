@@ -1,34 +1,32 @@
 <template>
-  <transition name="preview" @after-enter="beforeEnter">
+  <transition name="preview" @after-enter="afterEnter">
     <div class="v_p_box" v-show="status"
          :style="{left: X?X+'px':0, top: Y?Y+'px':0, width: width?width+'px':'100%', height: height? height + 'px': '100%'}">
       <div class="preview_head flex_box iconfont ">
         <i v-if="isPC" class="el-icon-view pointer iconfont icon-zoomout "
-           @click="zoomIn()"></i>
-        <i v-if="isPC" class="pointer iconfont icon-ZoomOut"
            @click="zoomOut()"></i>
-        <i class="iconfont icon-close pointer" @click="close()"></i>
+        <i v-if="isPC" class="el-icon-view pointer iconfont icon-ZoomOut"
+           @click="zoomIn()"></i>
+        <i class="el-icon-close pointer icon-narrow" @click="close()"></i>
       </div>
       <ul
         class="flex_box" style="cursor: default" >
         <li class="flex_box "
             :style="{left: -100*index + '%'}"
             v-for="item in imgList" >
-          <div
-               @touchstart.prevent="tStart($event)"
-               @touchmove.prevent="tMove($event)"
-               @touchend.prevent="tEnd($event)"
-               @touchcancel="tEnd($event)"
-               @dragover.prevent="dragPosition($event)"
-               @dragstart="dragstart($event)"
-               @dragend="dragend($event)"
-               :style="{top: top + 'px',left: left + 'px',transform: 'scale(' + scale + ')','transform-origin': scaleX*100 +'% '+scaleY*100 + '%'}"
-               :class="{ zoom_50: isPC?zoomStatus:false, ts_LandT: isTS }"
-          ><img :src="item" alt="图片加载失败"
-                @dblclick="zoom()" ></div></li>
+          <img :src="item" alt="图片加载失败" @touchstart.prevent="tStart($event)"
+                @touchmove.prevent="tMove($event)"
+                @touchend.prevent="tEnd($event)"
+                @touchcancel="tEnd($event)"
+                @dragover.prevent="dragPosition($event)"
+                @dragstart="dragstart($event)"
+                @dragend="dragend($event)"
+                @dblclick="zoom()"
+                :style="{top: top + 'px',left: left + 'px',transform: 'scale(' + scale + ')','transform-origin': 50 +'% '+50 + '%'}"
+                :class="{ zoom_50: isPC ? zoomStatus : false, ts_LandT: isTS }" ></li>
       </ul>
-      <span class="arrow_left pointer" v-show="index>0" @click="leftFn()"><i class="el-icon-arrow-left"></i></span>
-      <span class="arrow_right pointer" v-show="index<imgList.length-1" @click="rightFn()"><i class="el-icon-arrow-right"></i></span>
+      <span class="arrow_left pointer" v-show="index > 0" @click="leftFn()"><i class="iconfont icon-fanhui"></i></span>
+      <span class="arrow_right pointer" v-show="index < imgList.length-1" @click="rightFn()"><i class="iconfont icon-gengduo"></i></span>
       <div ref="empty_drag" style="width: 1px;height: 1px;background: white;"></div>
     </div>
   </transition>
@@ -39,10 +37,9 @@
       // 判断是否为PC端
       let isPC = true
       let userAgentInfo = navigator.userAgent
-      let Agents = 'Android iPhone SymbianOS WindowsPhone iPad iPod'
-      let arr = Agents.split(" ")
-      for(let i of arr) {
-        if (userAgentInfo.indexOf(i) > 0) {
+      const Agents = 'Android iPhone SymbianOS WindowsPhone iPad iPod'.split(' ')
+      for (let val of Agents) {
+        if (userAgentInfo.indexOf(val) >= 0) {
           isPC = false
           break
         }
@@ -74,6 +71,11 @@
         },
         toggle: {
 
+        },
+        doubleTouch: {
+          time: 0,
+          count: 0,
+          status: false
         }
       }
     },
@@ -94,7 +96,8 @@
         this.scaleY = 0
         this.status = true
       },
-      beforeEnter () {
+      // 动画完成后的回调
+      afterEnter () {
         this.X = 0
         this.Y = 0
         this.width = ''
@@ -105,9 +108,9 @@
       },
       zoom () {
         this.scale = this.scale === 1 ? 1.5 : 1
-        if (this.scale === 1) {
-          this.left = this.top = 0
-        }
+//        if (this.scale === 1) {
+//          this.left = this.top = 0
+//        }
       },
       zoomIn () {
         if (this.scale >= 2) {
@@ -143,7 +146,7 @@
       },
       rightFn () {
         this.zoomStatus = false
-        this.index = this.index + 1 < this.imgList.length ? this.index + 1 : this.imgList.length - 1
+        this.index = (this.index + 1) < this.imgList.length ? this.index + 1 : this.imgList.length - 1
         this.init()
       },
       tStart (event) {
@@ -153,6 +156,20 @@
           this.dragY = event.targetTouches[0].pageY
           this.isTS = false
           this.start = 1
+          // 判断是不是双击事件
+          // 第二次点击
+          if (this.doubleTouch.count) {
+            let time = new Date().getTime()
+            if (time - this.doubleTouch.time < 400) {
+              this.zoom()
+            }
+            this.doubleTouch.count = 0
+            this.doubleTouch.time = 0
+          } else {
+            // 记录第一次点击
+            this.doubleTouch.time = new Date().getTime()
+            this.doubleTouch.count = 1
+          }
         } else if (event.touches.length === 2) {
           this.start = 2
           this.touches.start = event.targetTouches
@@ -215,13 +232,16 @@
 <style lang="scss" scoped>
   /* 可以设置不同的进入和离开动画 */
   /* 设置持续时间和动画函数 */
-
+  *{
+    padding: 0;
+    margin: 0;
+  }
   @font-face {font-family: "iconfont";
-    src: url('//at.alicdn.com/t/font_379257_jjbpduoj1bk5ipb9.eot?t=1505460351699'); /* IE9*/
-    src: url('//at.alicdn.com/t/font_379257_jjbpduoj1bk5ipb9.eot?t=1505460351699#iefix') format('embedded-opentype'), /* IE6-IE8 */
-    url('data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAAAAAc0AAsAAAAACmQAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABHU1VCAAABCAAAADMAAABCsP6z7U9TLzIAAAE8AAAARAAAAFZW7kkOY21hcAAAAYAAAACEAAAB3mlWobhnbHlmAAACBAAAAv0AAAO0+9J6k2hlYWQAAAUEAAAAMQAAADYO1ocNaGhlYQAABTgAAAAgAAAAJAfSA4hobXR4AAAFWAAAABcAAAAcG+n/9GxvY2EAAAVwAAAAEAAAABAC+gPKbWF4cAAABYAAAAAfAAAAIAEWAF1uYW1lAAAFoAAAAUUAAAJtPlT+fXBvc3QAAAboAAAASgAAAF3qM5cMeJxjYGRgYOBikGPQYWB0cfMJYeBgYGGAAJAMY05meiJQDMoDyrGAaQ4gZoOIAgCKIwNPAHicY2Bk/ss4gYGVgYOpk+kMAwNDP4RmfM1gxMjBwMDEwMrMgBUEpLmmMDgwVDwXZG7438AQw9zH0AAUZgTJAQAm7AyReJzFkdEJwzAMRJ/j1JRSCgkZoyNkjH50lHz2q6MqWyQ9WYGQLpAzz3AHlowEXIAsnqKF9CXh+ihNNc/cat7ykn9wpaEwWW+DjbbM3boq//e7kt7sx31WrUadi0zhNKXzWh91r/d7cz6RaUNftD7wLdkQ+KZsDDRJbAl8m3MXUH5D5iEIeJxtkk9oFFccx9/3zb/MJDubvNnd2Z3Z3WR3dnc0q5t0/wrBXdBCW+mh4kF6yCEHD1X0GihtXdCAZNNiSaQVPNmC91yMxYML2YNSiAoGIhRaWigJ6qWCB+3E93Zd8OC84b3f9/Hj/T6/P0QhZP8v6a4UJxY5QD4iH5MvCIFaRNakKWT8aokWEc0oUTtiSr7nZzQvW5KOws6qkVi5Xi3YqqaGYSKNSqZc90vUR63apHMox1JAwnVOsXySSVdhxP30UnCC3kR00kuGm4eDzw61IuUpa2RxjLEEYysjqqKMUCqHTZy3Y7qiG2rwqxJ2oncnD9JJjCV85/MvQ1MuW7hSvZDK2zrQbsNyp8xbrQlngv/fODGLJbTx0EjcCXm5CBb/GY1bY6nC34R/EJu0SF8RlxAdHD6r6SjwTPhTIp2GDpGTT1uYDjm5UPAkeBLKOSFMB9tCo4hiX7cHZ7D9YT8Rhtd1k9e1TUZJihzkwb2oF61EK7VKzUMTtRJ8E1oadhMNu5HnkhtcmsCj+U5nfmUFicMzyrP19eey/Hz9xFL98bH//+3cluXbneUNWd6gPwmn+eD3I0ufDnzWnymYLT4+9qO8sTx07Ke8/3L/svRa+oHYxCMzhCh+vTFAKMiayuyY3LBF4hgiaCXkMyYiMTvTRLUg7W3FJhyX3vn5evDfJ8dbi19j+tuH46Xsm6+k3tq1TVnevLbWw6ugZ8XjFuZYPO5uJadmzzZu7BYyFzvfB3+cWVDnt8azh/BirSfLvbX+3qWJfIIPST5BaB90gf5JkqTKq6XVeHfUFCK2asf4qohZ872GaBo8MXxz0ETPWoimUa4f5Zi4foclGaRRWWapeyZj5i8PdMvBd11hrwrbuA/mshxO/3ZJ3HUVZXxMopa4xH3DsdDmLwhDf7AqHO65OfKO7STt8vrNik4Ow6fp+9EL2TDeUafB538IjO4g/p4O5hi7A4BzhmPsCNqc2yddfarjKte7hsOg7w2D44CuP+2LrpsTkDuG8xZbCsVIAAAAeJxjYGRgYADiowen68bz23xl4GZhAIGrDxfWw+j/X/63sDAw9wG5HAxMIFEAdxYNvAAAAHicY2BkYGBu+N/AEMPC8P8LAwMLAwNQBAWwAwB04QRjeJxjYWBgYH7JwMDCAMP/v8DYACk9AvgAAAAAAAB2AKwA8gFEAZIB2nicY2BkYGBgZwhkYGUAASYg5gJCBob/YD4DABFjAXQAeJxlj01OwzAQhV/6B6QSqqhgh+QFYgEo/RGrblhUavdddN+mTpsqiSPHrdQDcB6OwAk4AtyAO/BIJ5s2lsffvHljTwDc4Acejt8t95E9XDI7cg0XuBeuU38QbpBfhJto41W4Rf1N2MczpsJtdGF5g9e4YvaEd2EPHXwI13CNT+E69S/hBvlbuIk7/Aq30PHqwj7mXle4jUcv9sdWL5xeqeVBxaHJIpM5v4KZXu+Sha3S6pxrW8QmU4OgX0lTnWlb3VPs10PnIhVZk6oJqzpJjMqt2erQBRvn8lGvF4kehCblWGP+tsYCjnEFhSUOjDFCGGSIyujoO1Vm9K+xQ8Jee1Y9zed0WxTU/3OFAQL0z1xTurLSeTpPgT1fG1J1dCtuy56UNJFezUkSskJe1rZUQuoBNmVXjhF6XNGJPyhnSP8ACVpuyAAAAHicbcUxDoAgDAXQfhRquJy7myFlQpoAjcbTa+LqWx45+kT6x3CYMMMjgLEQLp+KduFN9Vht8P2uNmK2UnpqIjXUvTU9iR5o5A+2AAA=') format('woff'),
-    url('//at.alicdn.com/t/font_379257_jjbpduoj1bk5ipb9.ttf?t=1505460351699') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
-    url('//at.alicdn.com/t/font_379257_jjbpduoj1bk5ipb9.svg?t=1505460351699#iconfont') format('svg'); /* iOS 4.1- */
+    src: url('//at.alicdn.com/t/font_471741_liz72ymwrue7mn29.eot?t=1510403618688'); /* IE9*/
+    src: url('//at.alicdn.com/t/font_471741_liz72ymwrue7mn29.eot?t=1510403618688#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('data:application/x-font-woff;charset=utf-8;base64,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') format('woff'),
+    url('//at.alicdn.com/t/font_471741_liz72ymwrue7mn29.ttf?t=1510403618688') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
+    url('//at.alicdn.com/t/font_471741_liz72ymwrue7mn29.svg?t=1510403618688#iconfont') format('svg'); /* iOS 4.1- */
   }
 
   .iconfont {
@@ -232,22 +252,30 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  .icon-close:before { content: "\e63c"; }
-
   .icon-ZoomOut:before { content: "\e612"; }
+
+  .icon-fanhui:before { content: "\e600"; }
+
+  .icon-gengduo:before { content: "\e601"; }
 
   .icon-zoomout:before { content: "\e614"; }
 
   .icon-fullscreen:before { content: "\e6fe"; }
 
   .icon-narrow:before { content: "\e711"; }
+  .icon-gengduo,.icon-fanhui{
+    font-size: 30px;
+  }
 
   .preview-leave-active {
-    transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+    transition: all .1s cubic-bezier(1.0, 0.5, 0.8, 1.0);
     transform: translateX(100%);
   }
   .preview-level-to{
     transform: translateX(100%);
+  }
+  .pointer{
+    cursor: pointer;
   }
   .v_p_box{
     transition: all .5s ease;
@@ -291,12 +319,10 @@
           min-width: 100%;
           width: 100%;
           overflow: hidden;
-        >div{
-           left: 0;
-           top: 0;
-           position: relative;
-           transform: scale(1);
           >img{
+             left: 0;
+             top: 0;
+             transform: scale(1);
              position: relative;
              max-width: 100%;
               max-height: 100%;
@@ -306,13 +332,12 @@
              cursor: all-scroll;
             color: #fff;
            }
-         }
-        >div.zoom_50{
-           transition: transform 0.5s;
+        >img.zoom_50{
+           transition: transform 0.3s;
            transform: scale(1.5);
          }
-        >div.ts_LandT{
-           transition: transform 0.5s;
+        >img.ts_LandT{
+           transition: transform 0.3s;
           }
        }
      }
@@ -336,5 +361,13 @@
      color: white;
     padding: 5px;
    }
+  }
+  .flex_box {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
   }
 </style>
