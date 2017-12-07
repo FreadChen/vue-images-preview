@@ -18,20 +18,21 @@
         <!--可以扩展一下？-->
       </div>
       <ul
+        @drop.prevent="$_drop($event)"
         @touchstart.prevent="tStart($event)"
         @touchmove.prevent="tMove($event)"
         @touchend.prevent="tEnd($event)"
         @touchcancel="tEnd($event)"
-        @dragover.prevent="dragPosition($event)"
-        @dragstart="dragstart($event)"
-        @dragend="dragend($event)"
+        @mousemove="mousemove($event)"
+        @mousedown="mousedown($event)"
+        @mouseup="mouseup($event)"
+
         @dblclick="zoom()"
         class="flex_box" >
         <li class="flex_box "
             :style="{left: -100*index + '%',transform: 'scale(' + item.scale.percent + ')','transform-origin': item.scale.sX +' '+ item.scale.sY}"
             v-for="item in imgList" >
           <img :src="item.img" alt="图片加载失败"
-                @dragstart="$event.preventDefault()"
                 :style="{top: item.y + 'px',left: item.x + 'px'}"
                 :class="{ zoom_50: isPC ? zoomStatus : false, ts_LandT: isTS }" ></li>
       </ul>
@@ -42,6 +43,7 @@
   </transition>
 </template>
 <script type="text/javascript">
+  // drag事件因为浏览器的实现不一样，需要很多兼容性代码，而且IE的drag不能取消拖动时的缩影，所以采用mousemove模拟拖动事件
   export default {
     data () {
       // 判断是否为PC端
@@ -68,6 +70,9 @@
         // 拖拽事件的辅助
         dragX: '',
         dragY: '',
+        // 拖拽开始？
+        dragStatus: false,
+        // 是否启用过渡效果
         isTS: true,
         //  盒子的动效需要
         X: 0,
@@ -117,6 +122,8 @@
       // 双击缩放
       zoom () {
         this.nowImg.scale.percent = this.nowImg.scale.percent === 1 ? 1.5 : 1
+        this.nowImg.x = 0
+        this.nowImg.y = 0
       },
       // 放大
       zoomIn () {
@@ -131,26 +138,36 @@
           return
         }
         this.nowImg.scale.percent -= 0.5
+        this.nowImg.x = 0
+        this.nowImg.y = 0
       },
       // 拖拽开始
-      dragstart (event) {
-        console.log(0)
+      mousedown (event) {
         // 如果触发目标不是IMG则取消本次拖拽
         if (event.target.tagName !== 'IMG') {
-          console.log(1)
           event.stopPropagation()
           event.preventDefault()
           return false
         }
-        // 设置拖拽的元素
-        event.dataTransfer.setDragImage(this.$refs.empty_drag, 0, 0)
+        // 设置拖拽的元素 （IE不支持，可以参考https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/setDragImage）
+//        if (typeof event.dataTransfer.setDragImage === 'function') {
+//          event.dataTransfer.setDragImage(this.$refs.empty_drag, 0, 0)
+//        }
         this.dragX = event.pageX
         this.dragY = event.pageY
         this.isTS = false
+        this.dragStatus = true
+        event.preventDefault()
       },
       // 拖拽过程
-      dragPosition (event) {
-        console.log(2)
+      mousemove (event) {
+        // 判断鼠标是否已经按下
+        if (this.dragStatus === false) {
+          return
+        }
+        if (event.buttons !== 1) {
+          this.dragStatus = false
+        }
         // 宽度 = 图片的宽度 * scale （高度适用同样的算法）
         // 如果高或宽不超过窗口的高度或宽度，那么对应维度的拖拽式无效的
         // 如果高或宽超过窗口的高度，拖拽的极限是图像的边与窗口的边对齐
@@ -181,8 +198,13 @@
           this.dragY = event.pageY
         }
       },
-      dragend (event) {
+      mouseup (event) {
         this.isTS = true
+        this.dragStatus = false
+      },
+      // 放置动作
+      $_drop (event) {
+        event.preventDefault()
       },
       leftFn () {
         this.zoomStatus = false

@@ -10,14 +10,14 @@ import vueprview from './components/vue_preview'
 Vue.use(vueprview)
 // 调用
 var vm = new Vue()
-vm.$preview(item, imgList, key)
+vm.$preview({item: 0, imgList: images, key: 'test'})
 // 或者
 @click="$preview({item: detailData.head_portrait}, $event)"
 ~~~
 
 2. 参数说明
 
-$preview提供三个参数：
+$preview提供一个obj,里面有三个参数项：
    * item - string | number  定义显示的第一张图片，可以是一个图片地址或者是一个索引，为string的时候会忽略后面两个参数，为数字时会索引imgList[item]作为显示的第一张图
    * imgList - Array 要查看的图片列表
    * key - string 非必填，填了以后插件会尝试imgList[item][key]来获取图片的地址

@@ -15,21 +15,42 @@ const myPreview = {
       document.body.appendChild(instance.$el)
     }
     vue.prototype.$preview = function (obj, event) {
-      let rect = event ? event.toElement.getBoundingClientRect() : {}
+      let rect = event ? event.target.getBoundingClientRect() : {}
       if (typeof obj.item === 'string') {
-        instance.imgList = [obj.item]
+        instance.imgList = [
+          {
+            img: obj.item,
+            x: 0,
+            y: 0,
+            scale: {
+              percent: 1,
+              sX: 0.5,
+              sY: 0.5
+            }
+          }
+        ]
         instance.index = 0
       } else {
-        instance.imgList = []
-        if (obj.key) {
-          obj.imgList.map(function (value, i, arr) {
-            vue.set(instance.imgList, i, value[obj.key])
+        let arr = []
+        // 如果是object对象
+        if (obj.imgList instanceof Object) {
+          obj.imgList.map(function (value, i) {
+            arr[i] = {
+              img: obj.key === undefined ? value : value[obj.key],
+              x: 0,
+              y: 0,
+              scale: {
+                percent: 1,
+                sX: 0.5,
+                sY: 0.5
+              }
+            }
           })
-        } else {
-          instance.imgList = obj.imgList
         }
+        instance.imgList = arr
         instance.index = obj.item || 0
       }
+      instance.nowImg = instance.imgList[instance.index]
       // instance.init({
       //   left: rect.left || 0,
       //   top: rect.top || 0,
